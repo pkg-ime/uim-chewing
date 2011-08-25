@@ -2,7 +2,7 @@ Source: uim-chewing
 Section: utils
 Priority: optional
 Maintainer: Kan-Ru Chen <koster@debian.org>
-Build-Depends: debhelper (>= 8.0.0), autotools-dev,
+Build-Depends: debhelper (>= 8.0.0), autotools-dev, pkg-config,
                libuim-dev (>= 1:1.7.0), libchewing3-dev (>= 0.3.2)
 Standards-Version: 3.9.2
 Homepage: https://code.google.com/p/uim/
@@ -11,7 +11,7 @@ Vcs-Browser: http://git.debian.org/?p=pkg-ime/uim-chewing.git;a=summary
 
 Package: uim-chewing
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, uim-utils, uim-common
 Description: Universal Input Method - Chewing plugin
  Uim is an input method module library which supports various scripts and can
  act as a front end for a range of input methods, including Anthy, Canna,
