@@ -1,0 +1,36 @@
+Overview of changes from 0.0.3.x to 0.0.4
+==
+* New
+  * Support API of libchewing = 0.3.2
+
+* Fix
+  * Fix candidate window behavior with 'J' and 'K' keys in
+    selection mode.
+
+
+Overview of changes from 0.0.3.1 to 0.0.3.2
+==
+* Fix
+  * Fix candidate window behavior
+  * Fix support for DACHEN CP26 and HANYU_PINYIN keyboard type.
+
+
+Overview of changes from 0.0.2 to 0.0.3
+==
+* Support libchewing >= 0.3.091
+
+
+Overview of changes from 0.0.1 to 0.0.2
+==
+* New features
+  * Full/Half shape switch support by toolbar
+  * Keyboard type support
+
+* Fix
+  * Fix crash in some cases
+
+
+Overview of changes from 0.0.0 to 0.0.1
+==
+* Fix
+  - Fix compilation on uim-1.2.x
