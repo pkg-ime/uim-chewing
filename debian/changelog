@@ -1,0 +1,5 @@
+uim-chewing (0.0.4.2+20110825svn-1) unstable; urgency=low
+
+  * Initial release (Closes: #639212)
+
+ -- Kan-Ru Chen <koster@debian.org>  Thu, 25 Aug 2011 20:02:11 +0800
