@@ -9,5 +9,7 @@ override_dh_auto_install:
 	make -C scm install-uim_plugin_dataDATA DESTDIR=$(CURDIR)/debian/tmp
 	make -C pixmaps install DESTDIR=$(CURDIR)/debian/tmp
 
+override_dh_makeshlibs:
+
 %:
 	dh $@ 
