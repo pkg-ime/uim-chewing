@@ -2,7 +2,8 @@ Source: uim-chewing
 Section: utils
 Priority: optional
 Maintainer: Kan-Ru Chen <koster@debian.org>
-Build-Depends: debhelper (>= 8.0.0), autotools-dev, libuim-dev (>= 1:1.7.0)
+Build-Depends: debhelper (>= 8.0.0), autotools-dev,
+               libuim-dev (>= 1:1.7.0), libchewing3-dev (>= 0.3.2)
 Standards-Version: 3.9.2
 Homepage: https://code.google.com/p/uim/
 Vcs-Git: git://git.debian.org/pkg-ime/uim-chewing.git
