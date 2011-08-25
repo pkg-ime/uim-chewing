@@ -70,6 +70,7 @@ typedef struct chewing_context {
   int prev_page;
   int prev_cursor;
   int has_active_candwin;
+  int has_pending_input;
 } uim_chewing_context;
 
 static struct context {
@@ -135,7 +136,7 @@ configure_kbd_type(uim_chewing_context *ucc)
 {
   uim_lisp kbd_layout;
 
-  kbd_layout = uim_scm_eval_c_string("(chewing-get-kbd-layout)");
+  kbd_layout = uim_scm_callf("chewing-get-kbd-layout", "");
   chewing_set_KBType(ucc->cc, uim_scm_c_int(kbd_layout));
 }
 
@@ -144,26 +145,27 @@ configure(uim_chewing_context *ucc)
 {
   int i, style;
   int selkey[10];
-  uim_lisp phrase_forward, esc_clean, space_as_selection, sel_style,
-	   phrase_choice_rearward, auto_shift_cursor;
+  uim_lisp sel_style;
+  int phrase_forward, esc_clean, space_as_selection,
+      phrase_choice_rearward, auto_shift_cursor;
 
   chewing_set_candPerPage(ucc->cc, 10);
   chewing_set_maxChiSymbolLen(ucc->cc, 16);
 
-  phrase_forward = uim_scm_eval_c_string("chewing-phrase-forward?");
-  chewing_set_addPhraseDirection(ucc->cc, !uim_scm_c_bool(phrase_forward));
+  phrase_forward = uim_scm_symbol_value_bool("chewing-phrase-forward?");
+  chewing_set_addPhraseDirection(ucc->cc, !phrase_forward);
 
-  phrase_choice_rearward = uim_scm_eval_c_string("chewing-phrase-choice-rearward?");
-  chewing_set_phraseChoiceRearward(ucc->cc, uim_scm_c_bool(phrase_choice_rearward));
+  phrase_choice_rearward = uim_scm_symbol_value_bool("chewing-phrase-choice-rearward?");
+  chewing_set_phraseChoiceRearward(ucc->cc, phrase_choice_rearward);
 
-  auto_shift_cursor = uim_scm_eval_c_string("chewing-auto-shift-cursor?");
-  chewing_set_autoShiftCur(ucc->cc, uim_scm_c_bool(auto_shift_cursor));
+  auto_shift_cursor = uim_scm_symbol_value_bool("chewing-auto-shift-cursor?");
+  chewing_set_autoShiftCur(ucc->cc, auto_shift_cursor);
 
-  space_as_selection = uim_scm_eval_c_string("chewing-space-as-selection?");
-  chewing_set_spaceAsSelection(ucc->cc, uim_scm_c_bool(space_as_selection));
+  space_as_selection = uim_scm_symbol_value_bool("chewing-space-as-selection?");
+  chewing_set_spaceAsSelection(ucc->cc, space_as_selection);
 
-  esc_clean = uim_scm_eval_c_string("chewing-esc-clean?");
-  chewing_set_escCleanAllBuf(ucc->cc, uim_scm_c_bool(esc_clean));
+  esc_clean = uim_scm_symbol_value_bool("chewing-esc-clean?");
+  chewing_set_escCleanAllBuf(ucc->cc, esc_clean);
 
   sel_style =
     uim_scm_eval_c_string("(symbol-value chewing-candidate-selection-style)");
@@ -184,6 +186,7 @@ chewing_context_new()
     ucc->prev_page = -1;
     ucc->prev_cursor = -1;
     ucc->has_active_candwin = 0;
+    ucc->has_pending_input = 0;
   }
 
   return ucc;
@@ -192,84 +195,40 @@ chewing_context_new()
 static void
 activate_candwin(uim_chewing_context *ucc)
 {
-  char *buf;
-  int len;
-
-  len = strlen(ACTIVATE_CMD "(   )") + MAX_LENGTH_OF_INT_AS_STR * 3;
-  buf = malloc(len + 1);
-  snprintf(buf, len + 1, "(" ACTIVATE_CMD " %d %d %d)", ucc->slot_id,
-	   chewing_cand_TotalChoice(ucc->cc),
-	   chewing_cand_ChoicePerPage(ucc->cc));
-  uim_scm_eval_c_string(buf);
-  free(buf);
+  uim_scm_callf(ACTIVATE_CMD, "iii",
+		ucc->slot_id,
+		chewing_cand_TotalChoice(ucc->cc),
+		chewing_cand_ChoicePerPage(ucc->cc));
 }
 
 static void
 deactivate_candwin(uim_chewing_context *ucc)
 {
-  char *buf;
-  int len;
-
-  len = strlen(DEACTIVATE_CMD "( )") + MAX_LENGTH_OF_INT_AS_STR;
-  buf = malloc(len + 1);
-  snprintf(buf, len + 1, "(" DEACTIVATE_CMD " %d)", ucc->slot_id);
-  uim_scm_eval_c_string(buf);
-  free(buf);
+  uim_scm_callf(DEACTIVATE_CMD, "i", ucc->slot_id);
 }
 
 static void
 shift_candwin(uim_chewing_context *ucc, int dir)
 {
-  char *buf;
-  int len;
-
-  len = strlen(SHIFT_CMD "(  )") + MAX_LENGTH_OF_INT_AS_STR + 3;
-  buf = malloc(len + 1);
-  snprintf(buf, len + 1, "(" SHIFT_CMD " %d %s)", ucc->slot_id,
-	   dir ? "#t" : "#f");
-  uim_scm_eval_c_string(buf);
-  free(buf);
+  uim_scm_callf(SHIFT_CMD, "ib", ucc->slot_id, dir ? 1 : 0);
 }
 
 static void
 pushback_preedit_string(uim_chewing_context *ucc, const char *str, int attr)
 {
-  char *buf;
-  int len;
-
-  len = strlen(PUSHBACK_CMD "   \"\")") + strlen(str) +
-	       MAX_LENGTH_OF_INT_AS_STR + PREEDIT_ATTR_MAX_LEN;
-  buf = malloc(len + 1);
-  snprintf(buf, len + 1, "(" PUSHBACK_CMD " %d %d \"%s\")", ucc->slot_id,
-	   attr, str);
-  uim_scm_eval_c_string(buf);
-  free(buf);
+  uim_scm_callf(PUSHBACK_CMD, "iis", ucc->slot_id, attr, str);
 }
 
 static void
 clear_preedit(uim_chewing_context *ucc)
 {
-  char *buf;
-  int len;
-
-  len = strlen(CLEAR_CMD "( )") + MAX_LENGTH_OF_INT_AS_STR;
-  buf = malloc(len + 1);
-  snprintf(buf, len + 1, "(" CLEAR_CMD " %d)", ucc->slot_id);
-  uim_scm_eval_c_string(buf);
-  free(buf);
+  uim_scm_callf(CLEAR_CMD, "i", ucc->slot_id);
 }
 
 static void
 commit_string(uim_chewing_context *ucc, const char *str)
 {
-  char *buf;
-  int len;
-
-  len = strlen(COMMIT_CMD "(  \"\")") + strlen(str) + MAX_LENGTH_OF_INT_AS_STR;
-  buf = malloc(len + 1);
-  snprintf(buf, len + 1, "(" COMMIT_CMD " %d \"%s\")", ucc->slot_id, str);
-  uim_scm_eval_c_string(buf);
-  free(buf);
+  uim_scm_callf(COMMIT_CMD, "is", ucc->slot_id, str);
 }
 
 
@@ -550,6 +509,7 @@ press_key_internal(uim_chewing_context *ucc, int ukey, int state,
   } else {
       return uim_scm_f();
   }
+  ucc->has_pending_input = 1;
 
   return check_output(ucc);
 }
@@ -652,6 +612,27 @@ focus_out_context(uim_lisp id_)
   }
 
   return uim_scm_f();
+}
+
+static uim_lisp
+flush(uim_lisp id_)
+{
+  int id;
+  uim_chewing_context *ucc;
+
+  id = uim_scm_c_int(id_);
+  ucc = get_chewing_context(id);
+
+  if (!ucc)
+    return uim_scm_f();
+
+  if (ucc->has_pending_input) {
+      chewing_handle_Enter(ucc->cc);
+      check_output(ucc);
+      ucc->has_pending_input = 0;
+  }
+
+  return uim_scm_t();
 }
 
 static uim_lisp
@@ -843,6 +824,7 @@ uim_plugin_instance_init(void)
   uim_scm_init_subr_1("chewing-lib-reset-context", reset_context);
   uim_scm_init_subr_1("chewing-lib-focus-in-context", focus_in_context);
   uim_scm_init_subr_1("chewing-lib-focus-out-context", focus_out_context);
+  uim_scm_init_subr_1("chewing-lib-flush", flush);
   uim_scm_init_subr_1("chewing-lib-get-nr-candidates", get_nr_candidates);
   uim_scm_init_subr_2("chewing-lib-get-nth-candidate", get_nth_candidate);
   uim_scm_init_subr_1("chewing-lib-get-nr-candidates-per-page",

@@ -1,25 +1,68 @@
-2009-01-15 Etsushi Kato <ek.kato@gmail.com>
+2010-11-12 
+	
+	* src/chewing.c
+	  - (configure_kbd_type)
+	  - (configure)
+	  - (activate_candwin)
+	  - (deactivate_candwin)
+	  - (shift_candwin)
+	  - (pushback_preedit_string)
+	  - (clear_preedit)
+	  - (commit_string)
+	    - Don't use inefficient uim_scm_c_string().
+	      Use uim_scm_callf() instead.
+	
+2010-11-11 
+	
+	- Commit remaining input before deactivating uim-chewing (#31545,
+	  Kan-Ru Chen)
+	
+	* scm/chewing.scm
+	  - (chewing-press-key-handler) : Commit remaining input upon
+	    chewing-off-key?
+	* src/chewing.c
+	  - (chewing_context) : Add has_pending_input member.
+	  - (chewing_context_new) : Init has_pending_input.
+	  - (press_key_internal) : Set has_pending_input when key press is
+	    handled.
+	  - (flush) : New.  Commit remaining input if has_pending_input is
+	    set.
+	  - (uim_plugin_instance_init) : Export chewing-lib-flush for
+	    scheme side.
+	
+2010-08-16 
+	
+	* chewing-trunk/pixmaps/chewing_dark_background.svg
+	  - New.
+	* chewing-trunk/pixmaps/Makefile.am
+	  - Update to generate chewing_dark_background.png.
+	
+2010-08-16 
+	
+	* uim-chewing-trunk/configure.ac : Bump version.
+	
+2009-01-15 
 	
 	* scm/chewing.scm (chewing-input-mode-actions) : Reorder sequence.
 	
-2009-01-09 Etsushi Kato <ek.kato@gmail.com>
+2009-01-09 
 	
 	* configure.ac
 	* src/chewing.c
 	  - Support uim >= 1.6.0
 	
-2009-01-06 Etsushi Kato <ek.kato@gmail.com>
+2009-01-06 
 	
 	* src/chewing.c (check_output) : Bug fix.
 	* configure.ac : Bump version.
 	
-2009-01-06 Etsushi Kato <ek.kato@gmail.com>
+2009-01-06 
 	
 	* NEWS : Update.
 	* src/chewing.c : Fix candidate window behavior with 'J' and 'K'
 	  keys in selection mode.
 	
-2009-01-06 Etsushi Kato <ek.kato@gmail.com>
+2009-01-06 
 	
 	* scm/chewing-custom.scm
 	  - (chewing-phrase-choice-rearward?)
@@ -29,7 +72,7 @@
 	* src/chewing.c : Support API of libchewing-0.3.2.
 	* NEWS : Update.
 	
-2009-01-06 Etsushi Kato <ek.kato@gmail.com>
+2009-01-05 
 	
 	* scm/chewing.scm
 	* scm/chewing-custom.scm
@@ -39,15 +82,15 @@
 	* src/chewing.c (get_nth_candidate) : Bug fix.
 	* NEWS : Update.
 	
-2008-10-07 Etsushi Kato <ek.kato@gmail.com>
+2008-10-07 
 	
 	* configure.ac: Fix version check for libchewing-0.3.1.  Bump version.
 	
-2008-09-12 Etsushi Kato <ek.kato@gmail.com>
+2008-09-12 
 	
 	* scm/chewing.scm: Reorder on/off actions.
 	
-2008-09-12 Etsushi Kato <ek.kato@gmail.com>
+2008-09-12 
 	
 	* scm/chewing-key-custom.scm
 	* scm/chewing.scm
@@ -57,11 +100,11 @@
 	* COPYING
 	  - Update url in copyright.
 	
-2008-09-12 Etsushi Kato <ek.kato@gmail.com>
+2008-09-12 
 	
 	* Update.
 	
-2008-09-12 Etsushi Kato <ek.kato@gmail.com>
+2008-09-12 
 	
 	* pixmaps/chewing.svg
 	* pixmaps/Makefile.am
