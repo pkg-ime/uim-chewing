@@ -1,7 +1,8 @@
 Source: uim-chewing
 Section: utils
 Priority: optional
-Maintainer: Kan-Ru Chen <koster@debian.org>
+Maintainer: IME Packaging Team <pkg-ime-devel@lists.alioth.debian.org>
+Uploaders: Kan-Ru Chen <koster@debian.org>
 Build-Depends: debhelper (>= 8.0.0), autotools-dev, pkg-config,
                libuim-dev (>= 1:1.7.0), libchewing3-dev (>= 0.3.2)
 Standards-Version: 3.9.2
