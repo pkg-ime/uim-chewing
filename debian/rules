@@ -3,5 +3,11 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+override_dh_auto_install:
+
+	make -C src install DESTDIR=$(CURDIR)/debian/tmp
+	make -C scm install-uim_plugin_dataDATA DESTDIR=$(CURDIR)/debian/tmp
+	make -C pixmaps install DESTDIR=$(CURDIR)/debian/tmp
+
 %:
 	dh $@ 
