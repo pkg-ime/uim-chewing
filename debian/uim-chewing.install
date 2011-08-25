@@ -1,1 +1,3 @@
 usr/lib/uim/plugin/*.so
+usr/share/uim/*.scm
+usr/share/uim/pixmaps/*.png
